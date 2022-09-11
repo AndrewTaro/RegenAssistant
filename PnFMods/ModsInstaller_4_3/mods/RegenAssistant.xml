@@ -1,0 +1,44 @@
+<code>
+	<target_File file="gui/uss_settings.xml">
+		<!-- Insert code from <insert> in block <mods> w/o attrs-->
+		<root_Node>
+			<mods>
+				<insert>
+					<swffile>../unbound/mods/RegenAssistant.swf</swffile>
+					<attrs>
+						<do_if_not_exist tag="swffile" text="RegenAssistant.swf"/>
+					</attrs>
+				</insert>
+				<insert>
+					<xmlfile>../unbound/mods/RegenAssistant.xml</xmlfile>
+					<attrs>
+						<do_if_not_exist tag="xmlfile" text="RegenAssistant.xml"/>
+					</attrs>
+				</insert>
+			</mods>
+		</root_Node>
+	</target_File>
+	<target_File file="gui/battle_elements.xml">
+		<root_Node>
+			<find_Node tag="elementList">
+				<insert>
+					<element name="unboundRegenAssistant" class="lesta.libs.unbound.UnboundElement" url="battle_stats.swf">
+						<properties rootElementId="RegenAssistant" hitTest = "true"/>
+					</element>
+					<attrs>
+						<do_if_not_exist tag="element" type="name" name="unboundRegenAssistant"/>
+					</attrs>
+				</insert>
+			</find_Node>
+			<find_Node tag="controllers">
+				<insert>
+					<controller class="lesta.dialogs.battle_window_controllers.UnboundElementController" clips="unboundRegenAssistant"/>
+					<attrs>
+						<do_if_not_exist tag="controller" type="clips" name="unboundRegenAssistant"/>
+					</attrs>
+				</insert>
+			</find_Node>	
+		</root_Node>
+	</target_File>
+	<check name="RegenAssistant" version="1.0.0"/>
+</code>
