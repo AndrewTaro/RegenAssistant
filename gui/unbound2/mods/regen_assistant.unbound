@@ -17,32 +17,82 @@
 		(var regenSpeed:number = "regenSpeedEntity.parameter.currentValue" (event "regenSpeedEntity.parameter.evChanged"))
 		(var regenMaxValue:number = "round(regenSpeed * regenWorkTime)")
 		(var regenValue:number = "afterRegenHealth - currentHealth")
-		(var shouldUseRegen:number = "regenValue > regenMaxValue * 0.97")
+		
+		#booleans
+		(var isRegenMaxEffeciency:number = "regenValue > regenMaxValue * 0.97")
+		(var isRegenValueValid:bool = "regenValue >= 0")
+		(var isRegenReady:bool = "regenEntity.battleConsumable.state == SC.Battle.CONSUMABLE_STATES.READY" (event "regenEntity.battleConsumable.evStateChanged"))
+		(var isAlive:number = "vehicleEntity.health.isAlive" (event "vehicleEntity.health.evIsAliveChanged"))
+		(var shouldUseRegen:bool = "isAlive && isRegenMaxEffeciency && isRegenReady")
+
+		#effect animation
+		(event evPlayWarningAnim)
+		(event evStopWarningAnim)
+		(dispatch evPlayWarningAnim (bind trigger "shouldUseRegen") (bind enabled "!shouldUseRegen"))
+		(dispatch evStopWarningAnim (bind trigger "shouldUseRegen") (bind enabled "shouldUseRegen"))
+		(var effectRadius:number = "0" watch=false)
+		(var isEffectVisible:bool = "false" watch=false)
+		(bind isEffectVisible "true" init=false (event "evPlayWarningAnim"))
+		(bind isEffectVisible "false" init=false (event "evStopWarningAnim"))
+		(controller $Animation
+			(bindcall play  id='regen_assistant_anim'
+							duration=0.5
+							repeatCount=-1
+							easing="Easing.quint_out"
+							from=	"{ effectRadius: 0 }"
+							to	=	"{ effectRadius: 100 }"
+							(event "evPlayWarningAnim")
+			)
+			(bindcall stop	id='regen_assistant_anim' (event "evStopWarningAnim"))
+		)
 
 		#styles
-		(var regenValueTextColor:number = "shouldUseRegen ? SC.Ui_styles.SERVICE_COLORS.ORANGE : SC.Ui_styles.SERVICE_COLORS.GREEN")
+		(var isModVisible:bool = "isAlive && regenEntity && isRegenValueValid")
+		(var regenValueTextColor:number = "isRegenMaxEffeciency ? SC.Ui_styles.SERVICE_COLORS.ORANGE : SC.Ui_styles.SERVICE_COLORS.GREEN")
 		(macro DRAGGABLE_GET_DROP_POSITION _wndName = "'regenAssistant'" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
 	)
 	(block
 		#draggable
 		(element ModDraggableElement _wndName='regenAssistant' _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
 		#style
-		(bind visible "regenEntity")
+		(bind visible "isModVisible")
 		(style
 			(position = "absolute")
 			(bind left "drogPosX")
 			(bind top "drogPosY")
 			#(bind scaleX "scale")
 			#(bind scaleY "scale")
-		)	
+		)
 		(hblock	
 			(style
 				(hitTest = false)
-				(height = 40)
+				(height = 44)
+				(width = 95)
+				(marginBottom = "2px")
+				(marginLeft = "2px")
+				(marginTop = "2px")
+			)
+			#effect
+			(block
+				(bind visible "isEffectVisible")
+				(style
+					(position = "absolute")
+					(left = 50%)
+					(top = 50%)
+				)
+				(controller $Sector
+					(bind arc "360")
+					(bind radius "effectRadius")
+					(bind innerRadius "effectRadius")
+					(bind lineThickness "3")
+					(bind lineAlpha "1")
+					(bind lineColor "0xFFFFFF")
+				)
 			)
 			#image
 			(block
 				(style
+					(marginTop = 1px)
 					(width = 60)
 					(height = 60)
 					(scaleX = "0.66")
@@ -52,13 +102,10 @@
 			)
 			#text
 			(block
-				(style
-					(marginTop = 5px)
-					(marginBottom = 5px)
-				)
 				(element RegenAssistantTextItem "regenValue" "regenValueTextColor")
 				(element RegenAssistantTextItem "regenMaxValue")
-				#(macro trace "$scope")
+				#(macro trace "effectRadius")
+				#(macro trace "isEffectVisible")
 			)
 		)
 	)
@@ -66,10 +113,9 @@
 
 (def element RegenAssistantTextItem(_text:str, _color:number="SC.Ui_styles.SERVICE_COLORS.GREEN") layout=true
 	(tf
-		#(class $MiddleAligned)
 		(class $TextDefaultBoldNM)
 		(style
-			(width = 55px)
+			(width = 50px)
 			(bind textColor "_color")
 			(textAlign = "right")
 			(marginTop = 5px)
