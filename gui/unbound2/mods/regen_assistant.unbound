@@ -1,0 +1,80 @@
+(def element RegenAssistantUb2 () layout=true
+	(scope
+		(macro STAGE_SIZE)
+
+		#entities
+		(var camera:gfx = "$datahub.getSingleComponent(CC.camera)")
+		(var currentVehicleId:number = "camera.observedShipId" (event "camera.evObservedShipChanged"))
+		(var vehicleEntity:gfx = "$datahub.getPrimaryEntity(CC.vehicleInfo, currentVehicleId)")
+		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, '9_-1')")
+		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'workTime')")
+		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'regenerationHPSpeed')")
+
+		#calculations
+		(var currentHealth:number = "vehicleEntity.health.value" (event "vehicleEntity.health.evValueChanged"))
+		(var afterRegenHealth:number = "vehicleEntity.regeneration.maxValue" (event "vehicleEntity.regeneration.evChanged"))
+		(var regenWorkTime:number = "workTimeEntity.parameter.currentValue" (event "workTimeEntity.parameter.evChanged"))
+		(var regenSpeed:number = "regenSpeedEntity.parameter.currentValue" (event "regenSpeedEntity.parameter.evChanged"))
+		(var regenMaxValue:number = "round(regenSpeed * regenWorkTime)")
+		(var regenValue:number = "afterRegenHealth - currentHealth")
+		(var shouldUseRegen:number = "regenValue > regenMaxValue * 0.97")
+
+		#styles
+		(var regenValueTextColor:number = "shouldUseRegen ? SC.Ui_styles.SERVICE_COLORS.ORANGE : SC.Ui_styles.SERVICE_COLORS.GREEN")
+		(macro DRAGGABLE_GET_DROP_POSITION _wndName = "'regenAssistant'" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
+	)
+	(block
+		#draggable
+		(element ModDraggableElement _wndName='regenAssistant' _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
+		#style
+		(bind visible "regenEntity")
+		(style
+			(position = "absolute")
+			(bind left "drogPosX")
+			(bind top "drogPosY")
+			#(bind scaleX "scale")
+			#(bind scaleY "scale")
+		)	
+		(hblock	
+			(style
+				(hitTest = false)
+				(height = 40)
+			)
+			#image
+			(block
+				(style
+					(width = 60)
+					(height = 60)
+					(scaleX = "0.66")
+					(scaleY = "0.66")
+					(backgroundImage = "'url:../consumables/consumable_PCY010_RegenCrewPremium.png'")
+				)
+			)
+			#text
+			(block
+				(style
+					(marginTop = 5px)
+					(marginBottom = 5px)
+				)
+				(element RegenAssistantTextItem "regenValue" "regenValueTextColor")
+				(element RegenAssistantTextItem "regenMaxValue")
+				#(macro trace "$scope")
+			)
+		)
+	)
+)
+
+(def element RegenAssistantTextItem(_text:str, _color:number="SC.Ui_styles.SERVICE_COLORS.GREEN") layout=true
+	(tf
+		#(class $MiddleAligned)
+		(class $TextDefaultBoldNM)
+		(style
+			(width = 55px)
+			(bind textColor "_color")
+			(textAlign = "right")
+			(marginTop = 5px)
+			(marginBottom = 5px)
+		)
+		(bind text "_text")
+	)
+)
