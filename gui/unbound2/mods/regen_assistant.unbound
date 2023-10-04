@@ -1,3 +1,9 @@
+(def constant RA_ELEMENT_NAME "'regenAssistant'")
+(def constant RA_ANIM_LIMIT_NAME "'regenAssistant_LimitRegenWarning'")
+(def constant RA_ANIM_LIMIT_DESC "'I am a good player and certainly able to manage the heal.
+
+Limit the warning duration of unused heals to 3s)'")
+
 (def element RegenAssistantUb2 () layout=true
 	(scope
 		(macro STAGE_SIZE)
@@ -10,7 +16,7 @@
 		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'workTime')")
 		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'regenerationHPSpeed')")
 		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
-		(var userPrefsBool:gfx = "userPrefsComponent.userPrefs.elementsGroupExpand" (event "userPrefsComponent.evUserPrefsChanged"))
+		(var userPrefsBool:dict = "userPrefsComponent.userPrefs.elementsGroupExpand" (event "userPrefsComponent.evUserPrefsChanged"))
 
 		#calculations
 		(var currentHealth:number = "vehicleEntity.health.value" (event "vehicleEntity.health.evValueChanged"))
@@ -33,7 +39,7 @@
 		(event evStopWarningAnim)
 		(dispatch evPlayWarningAnim (bind trigger "shouldUseRegen") (bind enabled "!shouldUseRegen"))
 		(dispatch evStopWarningAnim (bind trigger "shouldUseRegen") (bind enabled "shouldUseRegen"))
-		(var isRegenAnimLimited:bool = "userPrefsBool.regenAssistant_LimitRegenWarning ? userPrefsBool.regenAssistant_LimitRegenWarning : false")
+		(var isRegenAnimLimited:bool = "RA_ANIM_LIMIT_NAME in userPrefsBool ? userPrefsBool[RA_ANIM_LIMIT_NAME] : false")
 		(var effectRadius:number = "0" watch=false)
 		(var isEffectVisible:bool = "false" watch=false)
 		(bind isEffectVisible "true" init=false (event "evPlayWarningAnim"))
@@ -54,11 +60,11 @@
 		#styles
 		(var isModVisible:bool = "isAlive && regenEntity && isRegenValueValid")
 		(var regenValueTextColor:number = "isRegenMaxEffeciency ? SC.Ui_styles.SERVICE_COLORS.ORANGE : SC.Ui_styles.SERVICE_COLORS.GREEN")
-		(macro DRAGGABLE_GET_DROP_POSITION _wndName = "'regenAssistant'" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
+		(macro DRAGGABLE_GET_DROP_POSITION _wndName = "RA_ELEMENT_NAME" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
 	)
 	(block
 		#draggable
-		(element ModDraggableElement _wndName='regenAssistant' _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
+		(element ModDraggableElement _wndName="RA_ELEMENT_NAME" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
 		#style
 		(bind visible "isModVisible")
 		(style
@@ -110,7 +116,6 @@
 				(element RegenAssistantTextItem "regenValue" "regenValueTextColor")
 				(element RegenAssistantTextItem "regenMaxValue")
 				#(macro trace "effectRadius")
-				#(macro trace "isEffectVisible")
 			)
 		)
 		(block
@@ -140,13 +145,13 @@
 (def element RegenAssistntAnimCheckBox () layout=true
 	(scope
 		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
-		(var userPrefsBool:gfx = "userPrefsComponent.userPrefs.elementsGroupExpand" (event "userPrefsComponent.evUserPrefsChanged"))
-		(var isRegenAnimLimited:bool = "userPrefsBool.regenAssistant_LimitRegenWarning ? userPrefsBool.regenAssistant_LimitRegenWarning : false")
+		(var userPrefsBool:dict = "userPrefsComponent.userPrefs.elementsGroupExpand" (event "userPrefsComponent.evUserPrefsChanged"))
+		(var isRegenAnimLimited:bool = "RA_ANIM_LIMIT_NAME in userPrefsBool ? userPrefsBool[RA_ANIM_LIMIT_NAME] : false")
 		(macro MOUSE_HANDLER_SCOPE)
 	)
 	(macro SOUND_HANDLER "'default_checkbox'")
 
-	(bindcall externalCall 'inputMapping.onAction' "['setUserPref', {'value': !isRegenAnimLimited, 'name': 'elementsGroupExpand', 'subName': 'regenAssistant_LimitRegenWarning'}]" init=false watch=false (event "evMouseDown"))
+	(bindcall externalCall 'inputMapping.onAction' "['setUserPref', {'value': !isRegenAnimLimited, 'name': 'elementsGroupExpand', 'subName': RA_ANIM_LIMIT_NAME}]" init=false watch=false (event "evMouseDown"))
 
 	(block
 		(style (flow = "horizontal") (width = "150px") (align = "middle"))
@@ -176,7 +181,7 @@
 				(width = "100%")
 				(margin = [2,10,2,10])
 			)
-			(text = "'I am a good player and certainly able to manage the heal (Limit the warning duration to 3s)'")
+			(text = "RA_ANIM_LIMIT_DESC")
 		)
 
 		(macro MOUSE_HANDLER "true")
@@ -209,8 +214,8 @@
 	(element ButtonSettingsSmall
 		(bind visible "isMouseActive")
 		(style
-			(position = "absolute") #(right = "-20px") (top = "-18px")
-			#(alpha = "0.3")
+			(position = "absolute")
+			(alpha = "0.8")
 			(left = "3px")
 			(top = "3px")
 		)
