@@ -33,7 +33,7 @@
 		(event evStopWarningAnim)
 		(dispatch evPlayWarningAnim (bind trigger "shouldUseRegen") (bind enabled "!shouldUseRegen"))
 		(dispatch evStopWarningAnim (bind trigger "shouldUseRegen") (bind enabled "shouldUseRegen"))
-		(var isRegenAnimLimited:bool = "userPrefsBool.regenAssistant_LimitRegenWarning")
+		(var isRegenAnimLimited:bool = "userPrefsBool.regenAssistant_LimitRegenWarning ? userPrefsBool.regenAssistant_LimitRegenWarning : false")
 		(var effectRadius:number = "0" watch=false)
 		(var isEffectVisible:bool = "false" watch=false)
 		(bind isEffectVisible "true" init=false (event "evPlayWarningAnim"))
@@ -154,7 +154,7 @@
 		(mc contrast_panel
 			(class $FullsizeAbsolute)
 			(style
-				(alpha = "0.4")
+				(alpha = "0.8")
 				(hitTest = false)
 			)
 		)
@@ -164,6 +164,9 @@
 				_enabled="true"
 				_rollOver="rollOver"
 				_interactive="true"
+			(style
+				(margin = [3,2,2,2])
+			)
 		)
 
 		(tf
@@ -171,8 +174,7 @@
 			(bind alpha "rollOver && !(mouseDown) ? TA : TC")
 			(style
 				(width = "100%")
-				(marginLeft = "S")
-				(marginTop = -3px)
+				(margin = [2,10,2,10])
 			)
 			(text = "'I am a good player and certainly able to manage the heal (Limit the warning duration to 3s)'")
 		)
