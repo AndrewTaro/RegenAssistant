@@ -9,6 +9,8 @@
 		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, '9_-1')")
 		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'workTime')")
 		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'regenerationHPSpeed')")
+		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
+		(var userPrefsBool:gfx = "userPrefsComponent.userPrefs.elementsGroupExpand" (event "userPrefsComponent.evUserPrefsChanged"))
 
 		#calculations
 		(var currentHealth:number = "vehicleEntity.health.value" (event "vehicleEntity.health.evValueChanged"))
@@ -26,10 +28,12 @@
 		(var shouldUseRegen:bool = "isAlive && isRegenMaxEffeciency && isRegenReady")
 
 		#effect animation
+		(event evAnimLimitChanged)
 		(event evPlayWarningAnim)
 		(event evStopWarningAnim)
 		(dispatch evPlayWarningAnim (bind trigger "shouldUseRegen") (bind enabled "!shouldUseRegen"))
 		(dispatch evStopWarningAnim (bind trigger "shouldUseRegen") (bind enabled "shouldUseRegen"))
+		(var isRegenAnimLimited:bool = "userPrefsBool.regenAssistant_LimitRegenWarning")
 		(var effectRadius:number = "0" watch=false)
 		(var isEffectVisible:bool = "false" watch=false)
 		(bind isEffectVisible "true" init=false (event "evPlayWarningAnim"))
@@ -37,13 +41,14 @@
 		(controller $Animation
 			(bindcall play  id='regen_assistant_anim'
 							duration=0.5
-							repeatCount=-1
+							repeatCount="isRegenAnimLimited ? 6 : -1"
 							easing="Easing.quint_out"
 							from=	"{ effectRadius: 0 }"
 							to	=	"{ effectRadius: 100 }"
 							(event "evPlayWarningAnim")
 			)
 			(bindcall stop	id='regen_assistant_anim' (event "evStopWarningAnim"))
+			(dispatch evStopWarningAnim on=evAnimEnded)
 		)
 
 		#styles
@@ -108,6 +113,13 @@
 				#(macro trace "isEffectVisible")
 			)
 		)
+		(block
+			(style
+				(position = absolute)
+				(right = 0)
+			)
+			(element RegenAssistantOptionButton)
+		)
 	)
 )
 
@@ -122,5 +134,83 @@
 			(marginBottom = 5px)
 		)
 		(bind text "_text")
+	)
+)
+
+(def element RegenAssistntAnimCheckBox () layout=true
+	(scope
+		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
+		(var userPrefsBool:gfx = "userPrefsComponent.userPrefs.elementsGroupExpand" (event "userPrefsComponent.evUserPrefsChanged"))
+		(var isRegenAnimLimited:bool = "userPrefsBool.regenAssistant_LimitRegenWarning ? userPrefsBool.regenAssistant_LimitRegenWarning : false")
+		(macro MOUSE_HANDLER_SCOPE)
+	)
+	(macro SOUND_HANDLER "'default_checkbox'")
+
+	(bindcall externalCall 'inputMapping.onAction' "['setUserPref', {'value': !isRegenAnimLimited, 'name': 'elementsGroupExpand', 'subName': 'regenAssistant_LimitRegenWarning'}]" init=false watch=false (event "evMouseDown"))
+
+	(block
+		(style (flow = "horizontal") (width = "150px") (align = "middle"))
+
+		(mc contrast_panel
+			(class $FullsizeAbsolute)
+			(style
+				(alpha = "0.4")
+				(hitTest = false)
+			)
+		)
+
+		(element CheckBoxNoLabel
+				_selected="isRegenAnimLimited"
+				_enabled="true"
+				_rollOver="rollOver"
+				_interactive="true"
+		)
+
+		(tf
+			(class $TextDefaultNM)
+			(bind alpha "rollOver && !(mouseDown) ? TA : TC")
+			(style
+				(width = "100%")
+				(marginLeft = "S")
+				(marginTop = -3px)
+			)
+			(text = "'I am a good player and certainly able to manage the heal (Limit the warning duration to 3s)'")
+		)
+
+		(macro MOUSE_HANDLER "true")
+	)
+)
+
+(def element RegenAssistantOptionButton () layout=true
+	(scope
+		(event evHideInfotip)
+		(event evOnButtonClicked)
+
+		(var mouse:gfx = "$datahub.getSingleComponent(CC.mouse)")
+		(var isMouseActive:bool = "mouse.active" (event "mouse.evActiveChanged"))
+
+		(var infotipVisible:bool = false)
+	)
+	(dispatch evHideInfotip args="{}" (bind trigger "isMouseActive"))
+
+	(controller $Tooltip
+		(renderer='RegenAssistntAnimCheckBox')
+		(bindcall show animation={duration:0.1, easing:"Easing.cubic_in", from:{alpha:1}, to:{alpha:1}} (event "evOnButtonClicked"))
+		(bindcall hide animation={duration:0.1, easing:"Easing.cubic_out", from:{alpha:1}, to:{alpha:0}} on='evClickOutside' (event "evHideInfotip"))
+		(bind infotipVisible "true" init=false on='evShow')
+		(bind infotipVisible "false" init=false on='evHide')
+		(priority=1)
+		(macro MINIMAP_TOOLTIP_COMMON_PARAMS)
+	)
+
+	
+	(element ButtonSettingsSmall
+		(bind visible "isMouseActive")
+		(style
+			(position = "absolute") #(right = "-20px") (top = "-18px")
+			#(alpha = "0.3")
+			(left = "3px")
+			(top = "3px")
+		)
 	)
 )
