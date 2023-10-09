@@ -2,7 +2,7 @@
 (def constant RA_ANIM_LIMIT_NAME "'regenAssistant_LimitRegenWarning'")
 (def constant RA_ANIM_LIMIT_DESC "'I am a good player and certainly able to manage the heal.
 
-Limit the warning duration of unused heals to 3s)'")
+Limit the warning duration of unused heals to 3s'")
 
 (def element RegenAssistantUb2 () layout=true
 	(scope
@@ -30,8 +30,9 @@ Limit the warning duration of unused heals to 3s)'")
 		(var isRegenMaxEffeciency:number = "regenValue > regenMaxValue * 0.97")
 		(var isRegenValueValid:bool = "regenValue >= 0")
 		(var isRegenReady:bool = "regenEntity.battleConsumable.state == SC.Battle.CONSUMABLE_STATES.READY" (event "regenEntity.battleConsumable.evStateChanged"))
+		(var isLocked:bool = "regenEntity.battleConsumable.isLocked" (event "regenEntity.battleConsumable.evIsLockedChanged"))
 		(var isAlive:number = "vehicleEntity.health.isAlive" (event "vehicleEntity.health.evIsAliveChanged"))
-		(var shouldUseRegen:bool = "isAlive && isRegenMaxEffeciency && isRegenReady")
+		(var shouldUseRegen:bool = "isAlive && isRegenMaxEffeciency && isRegenReady && !isLocked")
 
 		#effect animation
 		(event evAnimLimitChanged)
