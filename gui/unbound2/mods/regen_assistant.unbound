@@ -10,8 +10,9 @@ Limit the warning duration of unused heals to 3s'")
 
 		#entities
 		(var camera:gfx = "$datahub.getSingleComponent(CC.camera)")
-		(var currentVehicleId:number = "camera.observedShipId" (event "camera.evObservedShipChanged"))
-		(var vehicleEntity:gfx = "$datahub.getPrimaryEntity(CC.vehicleInfo, currentVehicleId)")
+		#(var currentVehicleId:number = "camera.observedShipId" (event "camera.evObservedShipChanged"))
+		#(var vehicleEntity:gfx = "$datahub.getPrimaryEntity(CC.vehicleInfo, currentVehicleId)")
+		(var vehicleEntity:gfx = "$datahub.getSingleEntity(CC.selfVehicle)")
 		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, '9_-1')")
 		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'workTime')")
 		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'regenerationHPSpeed')")
