@@ -2,7 +2,7 @@
 (def constant RA_ANIM_LIMIT_NAME "'regenAssistant_LimitRegenWarning'")
 (def constant RA_ANIM_LIMIT_DESC "'I am a good player and certainly able to manage the heal.
 
-Limit the warning duration of unused heals to 3s'")
+Limit the warning duration of unused heals to only once'")
 
 (def element RegenAssistantUb2 () layout=true
 	(scope
@@ -49,7 +49,7 @@ Limit the warning duration of unused heals to 3s'")
 		(controller $Animation
 			(bindcall play  id='regen_assistant_anim'
 							duration=0.5
-							repeatCount="isRegenAnimLimited ? 6 : -1"
+							repeatCount="isRegenAnimLimited ? 1 : -1"
 							easing="Easing.quint_out"
 							from=	"{ effectRadius: 0 }"
 							to	=	"{ effectRadius: 100 }"
