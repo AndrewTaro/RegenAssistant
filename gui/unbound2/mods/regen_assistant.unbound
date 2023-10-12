@@ -1,5 +1,5 @@
 (def constant RA_ELEMENT_NAME "'regenAssistant'")
-(def constant RA_ANIM_LIMIT_NAME "'regenAssistant_LimitRegenWarning'")
+(def constant RA_ANIM_LIMIT_NAME "'regenAssistant_limitWarningRepeat'")
 (def constant RA_ANIM_LIMIT_DESC "'Limit the repeat counts of unused heals warning
 
 In most cases, it is recommended to just use the heal rather than adjusting this value'")
@@ -11,8 +11,6 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 
 		#entities
 		(var camera:gfx = "$datahub.getSingleComponent(CC.camera)")
-		#(var currentVehicleId:number = "camera.observedShipId" (event "camera.evObservedShipChanged"))
-		#(var vehicleEntity:gfx = "$datahub.getPrimaryEntity(CC.vehicleInfo, currentVehicleId)")
 		(var vehicleEntity:gfx = "$datahub.getSingleEntity(CC.selfVehicle)")
 		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, '9_-1')")
 		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'workTime')")
@@ -159,7 +157,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		(var displayedCount:str = "regenAnimRepeatCount >= RA_ANIM_LIMIT_INF ? '∞' : regenAnimRepeatCount")
 	)
 
-	(bindcall externalCall 'inputMapping.onAction' "['setUserPref', {'value': round($event.value + 0.00001), 'name': 'chatBoxWidth', 'subName': RA_ANIM_LIMIT_NAME}]" init=false watch=false (event "evSliderValueChanged"))
+	(bindcall externalCall 'inputMapping.onAction' "['setUserPref', {'value': $event.value + 0.00001, 'name': 'chatBoxWidth', 'subName': RA_ANIM_LIMIT_NAME}]" init=false watch=false (event "evSliderValueChanged"))
 
 	(block
 		(style
@@ -191,7 +189,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 			)
 			(element DefaultSlider
 				_value = "regenAnimRepeatCount"
-				_intervalsCount = "7"
+				_intervalsCount = "RA_ANIM_LIMIT_INF"
 				_unitsInStepInterval = "1"
 				_width = 140
 			)
