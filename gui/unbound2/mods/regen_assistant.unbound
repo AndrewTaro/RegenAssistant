@@ -40,9 +40,9 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		(event evPlayWarningAnim)
 		(event evStopWarningAnim)
 		#(var isRegenAnimLimited:bool = "RA_ANIM_LIMIT_NAME in userPrefsBool ? userPrefsBool[RA_ANIM_LIMIT_NAME] : false")
-		(var regenAnimPrefRepeatCount:number = "RA_ANIM_LIMIT_NAME in userPrefsNum ? userPrefsNum[RA_ANIM_LIMIT_NAME] : RA_ANIM_LIMIT_INF")
+		(var regenAnimPrefRepeatCount:number = "RA_ANIM_LIMIT_NAME in userPrefsNum ? userPrefsNum[RA_ANIM_LIMIT_NAME] : 3")
 		(var regenAnimRepeatCount:number = "regenAnimPrefRepeatCount >= RA_ANIM_LIMIT_INF ? -1 : regenAnimPrefRepeatCount")
-		(var isRepeatEnabled:bool = "regenAnimPrefRepeatCount > 0")
+		(var isRepeatEnabled:bool = "regenAnimPrefRepeatCount >= 1")
 		(var isAnimationEnabled:bool = "isRepeatEnabled && shouldUseRegen")
 		(dispatch evPlayWarningAnim (bind trigger "isAnimationEnabled") (bind enabled "!shouldUseRegen && isRepeatEnabled"))
 		(dispatch evStopWarningAnim (bind trigger "isAnimationEnabled") (bind enabled "shouldUseRegen"))
@@ -153,7 +153,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		(event evSliderValueChanged) #slider event
 		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
 		(var userPrefsNum:dict = "userPrefsComponent.userPrefs.chatBoxWidth" (event "userPrefsComponent.evUserPrefsChanged"))
-		(var regenAnimRepeatCount:number = "RA_ANIM_LIMIT_NAME in userPrefsNum ? userPrefsNum[RA_ANIM_LIMIT_NAME] : RA_ANIM_LIMIT_INF")
+		(var regenAnimRepeatCount:number = "RA_ANIM_LIMIT_NAME in userPrefsNum ? userPrefsNum[RA_ANIM_LIMIT_NAME] : 3")
 		(var displayedCount:str = "regenAnimRepeatCount >= RA_ANIM_LIMIT_INF ? '∞' : regenAnimRepeatCount")
 	)
 
