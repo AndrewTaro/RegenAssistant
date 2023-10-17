@@ -4,6 +4,10 @@
 
 In most cases, it is recommended to just use the heal rather than adjusting this value'")
 (def constant RA_ANIM_LIMIT_INF 7)
+(def constant RA_ELEMENT_SIZE {
+	WIDTH: 95,
+	HEIGHT: 44
+})
 
 (def element RegenAssistantUb2 () layout=true
 	(scope
@@ -70,7 +74,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 	)
 	(block
 		#draggable
-		(element ModDraggableElement _wndName="RA_ELEMENT_NAME" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
+		(element ModDraggableElement _wndName="RA_ELEMENT_NAME" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}" _elmSize="{width: RA_ELEMENT_SIZE.WIDTH, height: RA_ELEMENT_SIZE.HEIGHT}")
 		#style
 		(bind visible "isModVisible")
 		(style
@@ -83,8 +87,8 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		(hblock	
 			(style
 				(hitTest = false)
-				(height = 44)
-				(width = 95)
+				(height = "RA_ELEMENT_SIZE.HEIGHT")
+				(width = "RA_ELEMENT_SIZE.WIDTH")
 				(marginBottom = "2px")
 				(marginLeft = "2px")
 				(marginTop = "2px")
