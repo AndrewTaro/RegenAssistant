@@ -16,7 +16,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		#entities
 		(var camera:gfx = "$datahub.getSingleComponent(CC.camera)")
 		(var vehicleEntity:gfx = "$datahub.getSingleEntity(CC.selfVehicle)")
-		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, '9_-1')")
+		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, '8_-1')")
 		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'workTime')")
 		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'regenerationHPSpeed')")
 		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
