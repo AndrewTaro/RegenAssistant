@@ -8,15 +8,22 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 	WIDTH: 95,
 	HEIGHT: 44
 })
+(def constant RA_REGEN_CONSUMABLE_ID {
+	LESTA	: '9_-1',
+	WG		: '8_-1',
+})
 
 (def element RegenAssistantUb2 () layout=true
 	(scope
 		(macro STAGE_SIZE)
 
+		(macro RegenAssistantGetIsLesta)
+		(var consumableId:str = "isLesta ? RA_REGEN_CONSUMABLE_ID.LESTA : RA_REGEN_CONSUMABLE_ID.WG")
+
 		#entities
 		(var camera:gfx = "$datahub.getSingleComponent(CC.camera)")
 		(var vehicleEntity:gfx = "$datahub.getSingleEntity(CC.selfVehicle)")
-		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, '8_-1')")
+		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, consumableId)")
 		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'workTime')")
 		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'regenerationHPSpeed')")
 		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
@@ -242,4 +249,9 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 			(top = "3px")
 		)
 	)
+)
+
+(def macro RegenAssistantGetIsLesta ()
+        (var realmConstants:gfx = "$datahub.getSingleComponent(CC.realmConstants)")
+        (var isLesta:bool = "realmConstants.currentRegion == 'RU'")
 )
