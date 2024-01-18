@@ -137,7 +137,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		)
 		(block
 			(style
-				(position = absolute)
+				(position = "absolute")
 				(right = 0)
 			)
 			(element RegenAssistantOptionButton)
