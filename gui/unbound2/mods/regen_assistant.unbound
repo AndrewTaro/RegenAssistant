@@ -86,8 +86,8 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		(bind visible "isModVisible")
 		(style
 			(position = "absolute")
-			(bind left "drogPosX")
-			(bind top "drogPosY")
+			(bind left "dragPosX")
+			(bind top "dragPosY")
 			#(bind scaleX "scale")
 			#(bind scaleY "scale")
 		)
