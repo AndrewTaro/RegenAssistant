@@ -22,28 +22,33 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 
 		#entities
 		(var camera:gfx = "$datahub.getSingleComponent(CC.camera)")
-		(var vehicleEntity:gfx = "$datahub.getSingleEntity(CC.selfVehicle)")
-		(var regenEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, consumableId)")
-		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'workTime')")
-		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenEntity.id) + '_' + 'regenerationHPSpeed')")
+		(var _markerEntity:gfx = "$datahub.getSingleEntity(CC.selfVehicle)")
+		(var regenConsEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, consumableId)")
+		(var regenConsComponent:gfx = "regenConsEntity ? regenConsEntity.battleConsumable : null")
+		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'workTime')")
+		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'regenerationHPSpeed')")
 		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
 		#(var userPrefsBool:dict = "userPrefsComponent.userPrefs.elementsGroupExpand" (event "userPrefsComponent.evUserPrefsChanged"))
 		(var userPrefsNum:dict = "userPrefsComponent.userPrefs.chatBoxWidth" (event "userPrefsComponent.evUserPrefsChanged"))
 
 		#calculations
-		(var currentHealth:number = "vehicleEntity.health.value" (event "vehicleEntity.health.evValueChanged"))
-		(var afterRegenHealth:number = "vehicleEntity.regeneration.maxValue" (event "vehicleEntity.regeneration.evChanged"))
-		(var regenWorkTime:number = "workTimeEntity.parameter.currentValue" (event "workTimeEntity.parameter.evChanged"))
-		(var regenSpeed:number = "regenSpeedEntity.parameter.currentValue" (event "regenSpeedEntity.parameter.evChanged"))
+		(macro GET_MARKER_ENTITY_COMPONENT 'health')
+		(var currentHealth:number = "healthComponent ? healthComponent.value : 0" (event "healthComponent.evValueChanged"))
+
+		(macro GET_MARKER_ENTITY_COMPONENT 'regeneration')
+		(var afterRegenHealth:number = "regenerationComponent ? regenerationComponent.maxValue : 0" (event "regenerationComponent.evChanged"))
+
+		(var regenWorkTime:number = "workTimeEntity ? workTimeEntity.parameter.currentValue : 0" (event "workTimeEntity.parameter.evChanged"))
+		(var regenSpeed:number = "regenSpeedEntity ? regenSpeedEntity.parameter.currentValue : 0" (event "regenSpeedEntity.parameter.evChanged"))
 		(var regenMaxValue:number = "round(regenSpeed * regenWorkTime)")
 		(var regenValue:number = "afterRegenHealth - currentHealth")
 		
 		#booleans
 		(var isRegenMaxEffeciency:number = "regenValue > regenMaxValue * 0.97")
 		(var isRegenValueValid:bool = "regenValue >= 0")
-		(var isRegenReady:bool = "regenEntity.battleConsumable.state == SC.Battle.CONSUMABLE_STATES.READY" (event "regenEntity.battleConsumable.evStateChanged"))
-		(var isLocked:bool = "regenEntity.battleConsumable.isLocked" (event "regenEntity.battleConsumable.evIsLockedChanged"))
-		(var isAlive:number = "vehicleEntity.health.isAlive" (event "vehicleEntity.health.evIsAliveChanged"))
+		(var isRegenReady:bool = "regenConsComponent ? regenConsComponent.state == SC.Battle.CONSUMABLE_STATES.READY : false" (event "regenConsComponent.evStateChanged"))
+		(var isLocked:bool = "regenConsComponent ? regenConsComponent.isLocked : false" (event "regenConsComponent.evIsLockedChanged"))
+		(var isAlive:number = "healthComponent ? healthComponent.isAlive : false" (event "healthComponent.evIsAliveChanged"))
 		(var shouldUseRegen:bool = "isAlive && isRegenMaxEffeciency && isRegenReady && !isLocked")
 
 		#effect animation
@@ -75,7 +80,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		)
 
 		#styles
-		(var isModVisible:bool = "isAlive && regenEntity && isRegenValueValid")
+		(var isModVisible:bool = "isAlive && regenConsEntity && isRegenValueValid")
 		(var regenValueTextColor:number = "isRegenMaxEffeciency ? SC.Ui_styles.SERVICE_COLORS.ORANGE : SC.Ui_styles.SERVICE_COLORS.GREEN")
 		(macro DRAGGABLE_GET_DROP_POSITION _wndName = "RA_ELEMENT_NAME" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
 	)
