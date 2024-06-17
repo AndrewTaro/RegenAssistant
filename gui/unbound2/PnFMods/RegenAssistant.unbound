@@ -1,8 +1,5 @@
 (def constant RA_ELEMENT_NAME "'regenAssistant'")
-(def constant RA_ANIM_LIMIT_NAME "'regenAssistant_limitWarningRepeat'")
-(def constant RA_ANIM_LIMIT_DESC "'Limit the repeat counts of unused heals warning
-
-In most cases, it is recommended to just use the heal rather than adjusting this value'")
+(def constant TT_REGENASSISTANT_INSTALLED "true")
 (def constant RA_ANIM_LIMIT_INF 7)
 (def constant RA_ELEMENT_SIZE {
 	WIDTH: 95,
@@ -13,25 +10,36 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 	WG		: '8_-1',
 })
 
+(def constant RA_PREFS {
+	DISABLE_DRAGDROP			: {KEY: 'regenAssistantDisableDragDrop', 		DEFAULT: false},# Disable Drag-Drop (Lock Position)
+	SCALE						: {KEY: 'regenAssistantScale', 					DEFAULT: 1.0,	MODIFIER: 0.1,	OFFSET: 0.5},	# Size Scale
+	WARNING_REPEATS				: {KEY: 'regenAssistantWarningAnimationRepeats',DEFAULT:   3,	MODIFIER:   1,	OFFSET: 0},	# Size Scale
+	BACKGROUND_ALPHA			: {KEY: 'regenAssistantBackgroundOpacity', 		DEFAULT: 0.0,	MODIFIER: 0.1,	OFFSET: 0},	# Contrast Panel Alpha
+})
+
 (def element RegenAssistantUb2 () layout=true
 	(scope
 		(macro STAGE_SIZE)
 
-		(macro RegenAssistantGetIsLesta)
+		(macro RA_GET_IS_LESTA)
 		(var consumableId:str = "isLesta ? RA_REGEN_CONSUMABLE_ID.LESTA : RA_REGEN_CONSUMABLE_ID.WG")
 
-		#entities
+		# Entities
 		(var camera:gfx = "$datahub.getSingleComponent(CC.camera)")
 		(var _markerEntity:gfx = "$datahub.getSingleEntity(CC.selfVehicle)")
 		(var regenConsEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, consumableId)")
 		(var regenConsComponent:gfx = "regenConsEntity ? regenConsEntity.battleConsumable : null")
 		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'workTime')")
 		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'regenerationHPSpeed')")
-		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
-		#(var userPrefsBool:dict = "userPrefsComponent.userPrefs.elementsGroupExpand" (event "userPrefsComponent.evUserPrefsChanged"))
-		(var userPrefsNum:dict = "userPrefsComponent.userPrefs.chatBoxWidth" (event "userPrefsComponent.evUserPrefsChanged"))
 
-		#calculations
+		# Prefs
+		(macro RA_GET_USERPREF)
+		(macro RA_GET_PREF_NUMBER _varName="'warningRepeatCountsPref'"	_pref="RA_PREFS.WARNING_REPEATS")
+		(macro RA_GET_PREF_NUMBER _varName="'scale'" 				_pref="RA_PREFS.SCALE")
+		(macro RA_GET_PREF_NUMBER _varName="'backgroundAlpha'" 		_pref="RA_PREFS.BACKGROUND_ALPHA")
+		(macro RA_GET_PREF_BOOL   _varName="'isPositionLocked'" 	_pref="RA_PREFS.DISABLE_DRAGDROP")
+
+		# Calculations
 		(macro GET_MARKER_ENTITY_COMPONENT 'health')
 		(var currentHealth:number = "healthComponent ? healthComponent.value : 0" (event "healthComponent.evValueChanged"))
 
@@ -43,7 +51,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		(var regenMaxValue:number = "round(regenSpeed * regenWorkTime)")
 		(var regenValue:number = "afterRegenHealth - currentHealth")
 		
-		#booleans
+		# Booleans
 		(var isRegenMaxEffeciency:number = "regenValue > regenMaxValue * 0.97")
 		(var isRegenValueValid:bool = "regenValue >= 0")
 		(var isRegenReady:bool = "regenConsComponent ? regenConsComponent.state == SC.Battle.CONSUMABLE_STATES.READY : false" (event "regenConsComponent.evStateChanged"))
@@ -51,14 +59,13 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		(var isAlive:number = "healthComponent ? healthComponent.isAlive : false" (event "healthComponent.evIsAliveChanged"))
 		(var shouldUseRegen:bool = "isAlive && isRegenMaxEffeciency && isRegenReady && !isLocked")
 
-		#effect animation
+		# Effect Animation
 		(event evAnimLimitChanged)
 		(event evPlayWarningAnim)
 		(event evStopWarningAnim)
-		#(var isRegenAnimLimited:bool = "RA_ANIM_LIMIT_NAME in userPrefsBool ? userPrefsBool[RA_ANIM_LIMIT_NAME] : false")
-		(var regenAnimPrefRepeatCount:number = "RA_ANIM_LIMIT_NAME in userPrefsNum ? userPrefsNum[RA_ANIM_LIMIT_NAME] : 3")
-		(var regenAnimRepeatCount:number = "regenAnimPrefRepeatCount >= RA_ANIM_LIMIT_INF ? -1 : regenAnimPrefRepeatCount")
-		(var isRepeatEnabled:bool = "regenAnimPrefRepeatCount >= 1")
+
+		(var warningRepeatCounts:number = "warningRepeatCountsPref >= RA_ANIM_LIMIT_INF ? -1 : warningRepeatCountsPref")
+		(var isRepeatEnabled:bool = "warningRepeatCountsPref >= 1")
 		(var isAnimationEnabled:bool = "isRepeatEnabled && shouldUseRegen")
 		(dispatch evPlayWarningAnim (bind trigger "isAnimationEnabled") (bind enabled "!shouldUseRegen && isRepeatEnabled"))
 		(dispatch evStopWarningAnim (bind trigger "isAnimationEnabled") (bind enabled "shouldUseRegen"))
@@ -69,7 +76,7 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 		(controller $Animation
 			(bindcall play  id='regen_assistant_anim'
 							duration=0.5
-							repeatCount="regenAnimRepeatCount"
+							repeatCount="warningRepeatCounts"
 							easing="Easing.quint_out"
 							from=	"{ effectRadius: 0 }"
 							to	=	"{ effectRadius: 100 }"
@@ -79,33 +86,43 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 			(dispatch evStopWarningAnim on=evAnimEnded)
 		)
 
-		#styles
+		# Styles
 		(var isModVisible:bool = "isAlive && regenConsEntity && isRegenValueValid")
 		(var regenValueTextColor:number = "isRegenMaxEffeciency ? SC.Ui_styles.SERVICE_COLORS.ORANGE : SC.Ui_styles.SERVICE_COLORS.GREEN")
 		(macro DRAGGABLE_GET_DROP_POSITION _wndName = "RA_ELEMENT_NAME" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
 	)
 	(block
-		#draggable
-		(element ModDraggableElement _wndName="RA_ELEMENT_NAME" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}" _elmSize="{width: RA_ELEMENT_SIZE.WIDTH, height: RA_ELEMENT_SIZE.HEIGHT}")
-		#style
+		# Draggable
+		(controller $Instance renderer='ModDraggableElement'
+			(bind enabled "!isPositionLocked")
+			(args
+				_wndName="RA_ELEMENT_NAME"
+				_defaults = "{positionX: 320, positionY: (stageHeight - 290)}"
+			)
+		)
+		# Style
 		(bind visible "isModVisible")
 		(style
 			(position = "absolute")
 			(bind left "dragPosX")
 			(bind top "dragPosY")
-			#(bind scaleX "scale")
-			#(bind scaleY "scale")
+			(margin = 2px)
 		)
 		(hblock	
 			(style
 				(hitTest = false)
 				(height = "RA_ELEMENT_SIZE.HEIGHT")
 				(width = "RA_ELEMENT_SIZE.WIDTH")
-				(marginBottom = "2px")
-				(marginLeft = "2px")
-				(marginTop = "2px")
+
+				(bind scaleX "scale")
+				(bind scaleY "scale")
 			)
-			#effect
+			# Background
+			(mc contrast_panel
+				(class $FullsizeAbsolute)
+				(bind alpha "backgroundAlpha")
+			)
+			# Effect
 			(block
 				(bind visible "isEffectVisible")
 				(style
@@ -122,35 +139,33 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 					(bind lineColor "0xFFFFFF")
 				)
 			)
-			#image
+			# Image
 			(block
 				(style
 					(marginTop = 1px)
-					(width = 60)
-					(height = 60)
-					(scaleX = "0.66")
-					(scaleY = "0.66")
+					(width = 40)
+					(height = 40)
 					(backgroundImage = "'url:../consumables/consumable_PCY010_RegenCrewPremium.png'")
+					(backgroundSize = "fill")
 				)
 			)
-			#text
+			# Text
 			(block
-				(element RegenAssistantTextItem "regenValue" "regenValueTextColor")
-				(element RegenAssistantTextItem "regenMaxValue")
-				#(macro trace "isAnimationEnabled")
+				(element RA_TextItem "regenValue" "regenValueTextColor")
+				(element RA_TextItem "regenMaxValue")
 			)
 		)
-		(block
+
+		# Mod Config
+		(element TT_ConfigButtonElement _modIndex = "11" _tooltipAlign="top|center"
 			(style
-				(position = "absolute")
-				(right = 0)
+				(left = -30px)
 			)
-			(element RegenAssistantOptionButton)
 		)
 	)
 )
 
-(def element RegenAssistantTextItem(_text:str, _color:number="SC.Ui_styles.SERVICE_COLORS.GREEN") layout=true
+(def element RA_TextItem(_text:str, _color:number="SC.Ui_styles.SERVICE_COLORS.GREEN") layout=true
 	(tf
 		(class $TextDefaultBoldNM)
 		(style
@@ -164,99 +179,20 @@ In most cases, it is recommended to just use the heal rather than adjusting this
 	)
 )
 
-(def element RegenAssistntAnimRepeatCountOption () layout=true
-	(scope
-		(event evSliderValueChanged) #slider event
-		(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
-		(var userPrefsNum:dict = "userPrefsComponent.userPrefs.chatBoxWidth" (event "userPrefsComponent.evUserPrefsChanged"))
-		(var regenAnimRepeatCount:number = "RA_ANIM_LIMIT_NAME in userPrefsNum ? userPrefsNum[RA_ANIM_LIMIT_NAME] : 3")
-		(var displayedCount:str = "regenAnimRepeatCount >= RA_ANIM_LIMIT_INF ? '∞' : regenAnimRepeatCount")
-	)
-
-	(bindcall externalCall 'inputMapping.onAction' "['setUserPref', {'value': $event.value + 0.00001, 'name': 'chatBoxWidth', 'subName': RA_ANIM_LIMIT_NAME}]" init=false watch=false (event "evSliderValueChanged"))
-
-	(block
-		(style
-			(width = "180px")
-			(align = "center")
-		)
-
-		(mc contrast_panel
-			(class $FullsizeAbsolute)
-			(style
-				(alpha = "0.8")
-				(hitTest = false)
-			)
-		)
-
-		(tf
-			(class $TextDefault)
-			(alpha = "TA")
-			(bind text "RA_ANIM_LIMIT_DESC")
-			(style
-				(width = 90%)
-			)
-		)
-		(hblock
-			(style
-				(align = "center|middle")
-				(marginBottom = 5px)
-				(marginLeft = 8px)
-			)
-			(element DefaultSlider
-				_value = "regenAnimRepeatCount"
-				_intervalsCount = "RA_ANIM_LIMIT_INF"
-				_unitsInStepInterval = "1"
-				_width = 140
-			)
-			(tf
-				(class $TextDefault)
-				(alpha = "TA")
-				(bind text "displayedCount")
-				(style
-					(marginLeft = 5px)
-					(width = 15px)
-				)
-			)
-		)
-	)
+(def macro RA_GET_IS_LESTA ()
+	(var realmConstants:gfx = "$datahub.getSingleComponent(CC.realmConstants)")
+	(var isLesta:bool = "realmConstants.currentRegion == 'RU'")
 )
 
-(def element RegenAssistantOptionButton () layout=true
-	(scope
-		(event evHideInfotip)
-		(event evOnButtonClicked)
-
-		(var mouse:gfx = "$datahub.getSingleComponent(CC.mouse)")
-		(var isMouseActive:bool = "mouse.active" (event "mouse.evActiveChanged"))
-
-		(var infotipVisible:bool = false)
-	)
-	(dispatch evHideInfotip args="{}" (bind trigger "isMouseActive"))
-
-	(controller $Tooltip
-		(renderer='RegenAssistntAnimRepeatCountOption')
-		(bindcall show animation={duration:0.1, easing:"Easing.cubic_in", from:{alpha:1}, to:{alpha:1}} (event "evOnButtonClicked"))
-		(bindcall hide animation={duration:0.1, easing:"Easing.cubic_out", from:{alpha:1}, to:{alpha:0}} on='evClickOutside' (event "evHideInfotip"))
-		(bind infotipVisible "true" init=false on='evShow')
-		(bind infotipVisible "false" init=false on='evHide')
-		(priority=1)
-		(macro MINIMAP_TOOLTIP_COMMON_PARAMS)
-	)
-
-	
-	(element ButtonSettingsSmall
-		(bind visible "isMouseActive")
-		(style
-			(position = "absolute")
-			(alpha = "0.8")
-			(left = "3px")
-			(top = "3px")
-		)
-	)
+(def macro RA_GET_USERPREF()
+	(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
+	(var userPrefsNum:gfx = "userPrefsComponent.userPrefs.chatBoxWidth" watch=false (event "userPrefsComponent.evUserPrefsChanged"))
 )
 
-(def macro RegenAssistantGetIsLesta ()
-        (var realmConstants:gfx = "$datahub.getSingleComponent(CC.realmConstants)")
-        (var isLesta:bool = "realmConstants.currentRegion == 'RU'")
+(def macro RA_GET_PREF_NUMBER (_varName:expression, _pref:expression)
+	(var name="_varName" type=number value="userPrefsNum && isNumber(userPrefsNum[_pref.KEY]) ? _pref.OFFSET + (round(userPrefsNum[_pref.KEY]) * _pref.MODIFIER) : _pref.DEFAULT")
+)
+
+(def macro RA_GET_PREF_BOOL (_varName:expression, _pref:expression)
+	(var name="_varName" type=bool value="userPrefsNum && isNumber(userPrefsNum[_pref.KEY]) ? round(userPrefsNum[_pref.KEY]) : _pref.DEFAULT")
 )
