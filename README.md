@@ -7,6 +7,7 @@ The modification shows the amount of HP that your ship can heal with the use of 
 # Requirements
 You must install the following for this mod to work:
 - [DraggableUnbound2](../../../DraggableUnbound2)
+- [TTaro Mod Config](../../../TTaroModConfig)
 
 # Install
 1. Download a zip.
