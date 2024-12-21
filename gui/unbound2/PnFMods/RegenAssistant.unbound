@@ -10,13 +10,6 @@
 	WG		: '8_-1',
 })
 
-(def constant RA_PREFS {
-	DISABLE_DRAGDROP			: {KEY: 'regenAssistantDisableDragDrop', 		DEFAULT: false},# Disable Drag-Drop (Lock Position)
-	SCALE						: {KEY: 'regenAssistantScale', 					DEFAULT: 1.0,	MODIFIER: 0.1,	OFFSET: 0.5},	# Size Scale
-	WARNING_REPEATS				: {KEY: 'regenAssistantWarningAnimationRepeats',DEFAULT:   3,	MODIFIER:   1,	OFFSET: 0},	# Size Scale
-	BACKGROUND_ALPHA			: {KEY: 'regenAssistantBackgroundOpacity', 		DEFAULT: 0.0,	MODIFIER: 0.1,	OFFSET: 0},	# Contrast Panel Alpha
-})
-
 (def element RegenAssistantUb2 () layout=true
 	(scope
 		(macro STAGE_SIZE)
@@ -33,11 +26,11 @@
 		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'regenerationHPSpeed')")
 
 		# Prefs
-		(macro RA_GET_USERPREF)
-		(macro RA_GET_PREF_NUMBER _varName="'warningRepeatCountsPref'"	_pref="RA_PREFS.WARNING_REPEATS")
-		(macro RA_GET_PREF_NUMBER _varName="'scale'" 				_pref="RA_PREFS.SCALE")
-		(macro RA_GET_PREF_NUMBER _varName="'backgroundAlpha'" 		_pref="RA_PREFS.BACKGROUND_ALPHA")
-		(macro RA_GET_PREF_BOOL   _varName="'isPositionLocked'" 	_pref="RA_PREFS.DISABLE_DRAGDROP")
+		(macro TT_GET_USERPREF)
+		(macro TT_GET_PREF_NUMBER _varName="'warningRepeatCountsPref'"	_pref="RA_PREFS.WARNING_REPEATS")
+		(macro TT_GET_PREF_NUMBER _varName="'scale'" 				_pref="RA_PREFS.SCALE")
+		(macro TT_GET_PREF_NUMBER _varName="'backgroundAlpha'" 		_pref="RA_PREFS.BACKGROUND_ALPHA")
+		(macro TT_GET_PREF_BOOL   _varName="'isPositionLocked'" 	_pref="RA_PREFS.DISABLE_DRAGDROP")
 
 		# Calculations
 		(macro GET_MARKER_ENTITY_COMPONENT 'health')
@@ -182,17 +175,4 @@
 (def macro RA_GET_IS_LESTA ()
 	(var realmConstants:gfx = "$datahub.getSingleComponent(CC.realmConstants)")
 	(var isLesta:bool = "realmConstants.currentRegion == 'RU'")
-)
-
-(def macro RA_GET_USERPREF()
-	(var userPrefsComponent:gfx = "$datahub.getSingleComponent(CC.userPrefs)")
-	(var userPrefsNum:gfx = "userPrefsComponent.userPrefs.chatBoxWidth" watch=false (event "userPrefsComponent.evUserPrefsChanged"))
-)
-
-(def macro RA_GET_PREF_NUMBER (_varName:expression, _pref:expression)
-	(var name="_varName" type=number value="userPrefsNum && isNumber(userPrefsNum[_pref.KEY]) ? _pref.OFFSET + (round(userPrefsNum[_pref.KEY]) * _pref.MODIFIER) : _pref.DEFAULT")
-)
-
-(def macro RA_GET_PREF_BOOL (_varName:expression, _pref:expression)
-	(var name="_varName" type=bool value="userPrefsNum && isNumber(userPrefsNum[_pref.KEY]) ? round(userPrefsNum[_pref.KEY]) : _pref.DEFAULT")
 )
