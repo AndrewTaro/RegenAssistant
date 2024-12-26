@@ -22,8 +22,8 @@
 		(var _markerEntity:gfx = "$datahub.getSingleEntity(CC.selfVehicle)")
 		(var regenConsEntity:gfx = "$datahub.getPrimaryEntity(CC.battleConsumable, consumableId)")
 		(var regenConsComponent:gfx = "regenConsEntity ? regenConsEntity.battleConsumable : null")
-		(var workTimeEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'workTime')")
-		(var regenSpeedEntity:gfx = "$datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'regenerationHPSpeed')")
+		(var workTimeEntity:gfx = "regenConsEntity ? $datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'workTime') : null")
+		(var regenSpeedEntity:gfx = "regenConsEntity ? $datahub.getPrimaryEntity(CC.parameter, toString(regenConsEntity.id) + '_' + 'regenerationHPSpeed') : null")
 
 		# Prefs
 		(macro TT_GET_USERPREF)
