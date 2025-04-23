@@ -8,10 +8,11 @@
 					</element>
 					<attrs>
 						<do_if_not_exist tag="element" type="name" name="unbound2RegenAssistantUb2"/>
+						<position insert="after_node" tag="element" attr_1="elementName" value_1="MainHud"/>
 					</attrs>
 				</insert>
 			</find_Node>
 		</root_Node>
 	</target_File>
-	<check name="RegenAssistantUb2" version="2.0.0"/>
+	<check name="RegenAssistantUb2" version="2.1.0"/>
 </code>
