@@ -82,15 +82,15 @@
 		# Styles
 		(var isModVisible:bool = "isAlive && regenConsEntity && isRegenValueValid")
 		(var regenValueTextColor:number = "isRegenMaxEffeciency ? SC.Ui_styles.SERVICE_COLORS.ORANGE : SC.Ui_styles.SERVICE_COLORS.GREEN")
-		(macro DRAGGABLE_GET_DROP_POSITION _wndName = "RA_ELEMENT_NAME" _defaults = "{positionX: 320, positionY: (stageHeight - 290)}")
+		(macro DRAGGABLE_GET_DROP_POSITION _elementName = "RA_ELEMENT_NAME" _defaultPosition = "{positionX: 320, positionY: (stageHeight - 290)}")
 	)
 	(block
 		# Draggable
 		(controller $Instance renderer='ModDraggableElement'
 			(bind enabled "!isPositionLocked")
 			(args
-				_wndName="RA_ELEMENT_NAME"
-				_defaults = "{positionX: 320, positionY: (stageHeight - 290)}"
+				_elementName="RA_ELEMENT_NAME"
+				_defaultPosition = "{positionX: 320, positionY: (stageHeight - 290)}"
 			)
 		)
 		# Style
