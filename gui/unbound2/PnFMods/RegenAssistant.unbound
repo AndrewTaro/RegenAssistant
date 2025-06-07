@@ -47,7 +47,7 @@
 		# Booleans
 		(var isRegenMaxEffeciency:number = "regenValue > regenMaxValue * 0.97")
 		(var isRegenValueValid:bool = "regenValue >= 0")
-		(var regenNum:number = "regenConsComponent ? regenConsComponent.consumeNum : 0" (event "regenConsComponent.evConsumeNumChanged"))
+		(var regenNum:number = "regenConsComponent ? regenConsComponent.maxCharge : 0" (event "regenConsComponent.evMaxChargeChanged"))
 		(var regenState:number = "regenConsComponent ? regenConsComponent.state : -1" (event "regenConsComponent.evStateChanged"))
 		(var isRegenReady:bool = "regenState == SC.Battle.CONSUMABLE_STATES.READY || (regenNum > 0 && regenState == SC.Battle.CONSUMABLE_STATES.NO_AMMO)") # Increment from UniqueSkill
 		(var isLocked:bool = "regenConsComponent ? regenConsComponent.isLocked : false" (event "regenConsComponent.evIsLockedChanged"))
